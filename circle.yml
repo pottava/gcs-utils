@@ -1,0 +1,49 @@
+version: 2
+jobs:
+  test:
+    working_directory: /go/src/github.com/pottava/gcs-utils
+    docker:
+      - image: circleci/golang:1.14.3
+    steps:
+      - checkout
+      - run: go mod download
+      - run: go mod verify
+      - run:
+          name: Run tests
+          command: |
+            go test -cover -bench -benchmem $(go list ./...)
+  build-download:
+    working_directory: /go/src/github.com/pottava/gcs-utils
+    docker:
+      - image: circleci/golang:1.14.3
+    steps:
+      - checkout
+      - run: go mod download
+      - run: go mod verify
+      - run: go get github.com/tcnksm/ghr
+      - run:
+          name: Build and release
+          command: |
+            cd cmd/download
+            mkdir dist
+            CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags "-s -w -X main.ver=${CIRCLE_TAG} -X main.commit=${CIRCLE_SHA1:0:7} -X main.date=$(date +%Y-%m-%d --utc)" -o "dist/gcs-download-linux"
+            CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w -X main.ver=${CIRCLE_TAG} -X main.commit=${CIRCLE_SHA1:0:7} -X main.date=$(date +%Y-%m-%d --utc)" -o "dist/gcs-download-mac"
+            CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags "-s -w -X main.ver=${CIRCLE_TAG} -X main.commit=${CIRCLE_SHA1:0:7} -X main.date=$(date +%Y-%m-%d --utc)" -o "dist/gcs-download.exe"
+            ghr -t $GITHUB_TOKEN -u $CIRCLE_PROJECT_USERNAME -r $CIRCLE_PROJECT_REPONAME --replace ${CIRCLE_TAG} ./dist/
+
+workflows:
+  version: 2
+  dev:
+    jobs:
+      - test:
+          filters:
+            branches:
+              only: /.*/
+  release:
+    jobs:
+      - build-download:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /download-v[0-9]+(\.[0-9]+)*/
