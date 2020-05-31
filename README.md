@@ -35,3 +35,9 @@ $ curl -Ls https://github.com/pottava/gcs-utils/releases/download/upload-v0.5.0/
 $ curl -Ls https://github.com/pottava/gcs-utils/releases/download/download-v0.5.0/gcs-download-mac \
   -o gcs-download && chmod +x gcs-download
 ```
+
+### Windows
+
+```bash
+$ 
+```

@@ -1,0 +1,8 @@
+# docker build -f Dockerfile.linux -t pottava/gcs-download:linux .
+# docker run --rm -it -v "${HOME}/.config/gcloud:/root/.config/gcloud" pottava/gcs-download:linux
+
+FROM alpine:3.11
+ADD https://github.com/pottava/gcs-utils/releases/download/download-v0.5.0/gcs-download-linux /app
+RUN chmod +x /app
+ENTRYPOINT ["/app"]
+CMD ["--help"]

@@ -1,0 +1,5 @@
+# docker build -f Dockerfile.win -t pottava/gcs-download:win .
+
+FROM mcr.microsoft.com/windows/nanoserver:1809
+ADD https://github.com/pottava/gcs-utils/releases/download/download-v0.5.0/gcs-download.exe C:\\gcs-download.exe
+ENTRYPOINT ["C:\\gcs-download.exe"]
